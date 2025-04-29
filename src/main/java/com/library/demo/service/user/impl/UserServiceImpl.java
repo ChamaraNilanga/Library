@@ -4,6 +4,7 @@ import com.library.demo.dto.requestDTO.UserRequestDTO;
 import com.library.demo.dto.responseDTO.UserResponseDTO;
 import com.library.demo.entity.User;
 import com.library.demo.exception.DataValidationException;
+import com.library.demo.exception.ResourceNotFoundException;
 import com.library.demo.repository.UserRepository;
 import com.library.demo.service.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -39,5 +40,11 @@ public class UserServiceImpl implements UserService {
         BeanUtils.copyProperties(user,userResponseDTO);
 
         return userResponseDTO;
+    }
+
+    @Override
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
     }
 }

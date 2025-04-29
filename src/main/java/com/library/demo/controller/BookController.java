@@ -2,6 +2,7 @@ package com.library.demo.controller;
 
 import com.library.demo.dto.requestDTO.BookRequestDTO;
 import com.library.demo.dto.requestDTO.UserRequestDTO;
+import com.library.demo.dto.responseDTO.BookListDTO;
 import com.library.demo.dto.responseDTO.BookListResponseDTO;
 import com.library.demo.dto.responseDTO.BookResponseDTO;
 import com.library.demo.dto.responseDTO.UserResponseDTO;
@@ -17,8 +18,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import static com.library.demo.constants.Constants.*;
 import static com.library.demo.util.Helper.getSortingProperty;
 
 @RestController
@@ -40,13 +43,13 @@ public class BookController {
     @PostMapping("/search")
     public ResponseEntity<BookListResponseDTO> searchApplicationLocation(
             @Min(1)
-            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(name = "page", required = false, defaultValue = PAGINATION_DEFAULT_PAGE) int page,
 
             @Min(10)
-            @RequestParam(name = "pageSize", required = false, defaultValue = "10") int pageSize,
+            @RequestParam(name = "pageSize", required = false, defaultValue = PAGINATION_DEFAULT_PAGE_SIZE) int pageSize,
 
-            @RequestParam(name = "sortType", required = false, defaultValue = "DESC") String sortType,
-            @RequestParam(name = "sortBy", required = false, defaultValue = "id") String sortBy,
+            @RequestParam(name = "sortType", required = false, defaultValue = DEFAULT_SORT_TYPE) String sortType,
+            @RequestParam(name = "sortBy", required = false, defaultValue = DEFAULT_SORT_BY) String sortBy,
 
             @RequestBody BookSearchDTO searchDTO
     ) {
@@ -55,5 +58,12 @@ public class BookController {
         Pageable pageRequest = PageRequest.of(page - 1, pageSize, sort);
         return new ResponseEntity<>(bookService.searchBooks(pageRequest, searchDTO), HttpStatus.OK);
 
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<BookListDTO> getAllBooks () {
+
+        log.info("GET ALL BOOKS");
+        return new ResponseEntity<>(bookService.getAllBooks(), HttpStatus.OK);
     }
 }

@@ -24,21 +24,4 @@ public class UserController {
         log.info("CALLED USER CREATION END POINT");
         return new ResponseEntity<>(userService.register(userRequestDTO), HttpStatus.OK);
     }
-
-    @GetMapping("/all")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public  String getUsers () {
-        return "Users fetched Successfully";
-    }
-
-    @GetMapping("/welcome")
-    public  String Welcome () {
-        return "Users Welcome";
-    }
-
-    @GetMapping("/getOne")
-    @PreAuthorize("hasAuthority('ROLE_USER')")
-    public  String userOnly () {
-        return "Users Only Welcome";
-    }
 }

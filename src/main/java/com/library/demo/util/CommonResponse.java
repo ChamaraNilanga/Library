@@ -5,8 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -14,8 +13,7 @@ import java.util.List;
 @Builder
 
 public class CommonResponse {
-    private List<Object> payload = null;
-    private List<String> errorMessages = new ArrayList<>();
-    private boolean status = false;
-    private String message = null;
+    private boolean status;
+    private String message;
+    private Map<String, String> payload;
 }

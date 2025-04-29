@@ -12,7 +12,7 @@ import java.util.List;
 
 @UtilityClass
 public class BookSpecification {
-    public static Specification<Book> bookSearch(BookSearchDTO bookSearchDTO) {
+    public static Specification<Book> bookSearch(BookSearchDTO bookSearchDTO)  {
         return ((root, query, criteriaBuilder) -> {
 
             List<Predicate> predicates = new ArrayList<>();

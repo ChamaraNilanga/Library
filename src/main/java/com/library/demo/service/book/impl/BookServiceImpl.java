@@ -1,11 +1,13 @@
 package com.library.demo.service.book.impl;
 
 import com.library.demo.dto.requestDTO.BookRequestDTO;
+import com.library.demo.dto.responseDTO.BookListDTO;
 import com.library.demo.dto.responseDTO.BookListResponseDTO;
 import com.library.demo.dto.responseDTO.BookResponseDTO;
 import com.library.demo.dto.searchDTO.BookSearchDTO;
 import com.library.demo.entity.Book;
 import com.library.demo.exception.DataValidationException;
+import com.library.demo.exception.ResourceNotFoundException;
 import com.library.demo.repository.BookRepository;
 import com.library.demo.service.book.BookService;
 import com.library.demo.spcification.BookSpecification;
@@ -18,7 +20,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -26,7 +27,6 @@ import java.util.Optional;
 public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
-    private final BookSpecification bookSpecification;
 
     @Override
     public BookResponseDTO addBook(BookRequestDTO bookRequestDTO) {
@@ -35,7 +35,7 @@ public class BookServiceImpl implements BookService {
         bookRepository.findByTitle(bookRequestDTO.getTitle())
                 .ifPresent(record -> {
                     throw new DataValidationException(
-                            "User already registered with email.", bookRequestDTO.getTitle()
+                            "Book already added.", bookRequestDTO.getTitle()
                     );
                 });
         book = bookRepository.save(book);
@@ -45,18 +45,38 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookListResponseDTO searchBooks(Pageable pageRequest, BookSearchDTO searchDTO) {
-        Specification<Book> specification = bookSpecification.bookSearch(searchDTO);
-        Page<Book> books = bookRepository.searchBooks(pageRequest ,specification);
+    public BookListResponseDTO searchBooks(Pageable pageRequest, BookSearchDTO bookSearch) {
+        Specification<Book> specification = BookSpecification.bookSearch(bookSearch);
+        Page<Book> books = bookRepository.findAll(specification,pageRequest);
         return mapToBookListResponse(books);
     }
 
     @Override
     public Book getBookById(Long bookId) {
-        BookResponseDTO bookResponseDTO = new BookResponseDTO();
-        Optional<Book> book = bookRepository.findById(bookId);
-        if(book.isEmpty()) {}
-        return book.get();
+
+        return bookRepository.findById(bookId)
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + bookId));
+    }
+
+    @Override
+    public void updateBookAvailableCount(Book book) {
+        book.setAvailableCopies(book.getAvailableCopies()-1);
+        bookRepository.save(book);
+    }
+
+    @Override
+    public BookListDTO getAllBooks() {
+        List<BookResponseDTO> bookResponseDTOList = bookRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .toList();
+
+        return new BookListDTO(bookResponseDTOList);
+    }
+
+    private BookResponseDTO convertToDTO(Book book) {
+        BookResponseDTO dto = new BookResponseDTO();
+        BeanUtils.copyProperties(book, dto);
+        return dto;
     }
 
     private BookListResponseDTO mapToBookListResponse(Page<Book> books) {
